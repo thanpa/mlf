@@ -1,4 +1,9 @@
 <?php
+/**
+ * View class.
+ *
+ * @author Thanasis <hello@thanpa.com>
+ */
 class View
 {
     /**

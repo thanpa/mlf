@@ -1,8 +1,33 @@
 <?php
+/**
+ * Pdf class for printing functionality.
+ *
+ * @author Thanasis <hello@thanpa.com>
+ */
 class Pdf
 {
+    /**
+     * The path to the PDF file.
+     *
+     * @var string
+     */
     private $_path = '';
+    /**
+     * The content to the PDF file.
+     *
+     * @var string
+     */
     private $_content = '';
+    /**
+     * Costructs the PDF instance.
+     *
+     * <p>Locates the path to use.
+     * <p>Executes the rasterize of the contents.
+     *
+     * @param string $html
+     * @return null
+     * @throws Exception In case the exit code is not 0.
+     */
     public function __construct($html)
     {
         $tmp = sys_get_temp_dir();
@@ -17,6 +42,11 @@ class Pdf
             throw new Exception("Exit code of phantomjs is '{$code}'");
         }
     }
+    /**
+     * Returns the binary content of the created PDF file.
+     *
+     * @return string
+     */
     public function getContent()
     {
         if (empty($this->_content)) {
@@ -24,15 +54,32 @@ class Pdf
         }
         return $this->_content;
     }
+    /**
+     * Returns the path of the PDF file.
+     *
+     * @return string
+     */
     public function getPath()
     {
         return $this->_path;
     }
+    /**
+     * Returns the binary content of the created PDF file.
+     *
+     * @return string
+     */
     public function __toString()
     {
         return $this->getContent();
     }
-    private function _virginFiles($files)
+    /**
+     * Makes virgin (unlinks/empties) a list of files by the provided paths.
+     *
+     * @param array $files
+     * @return boolean
+     * @throws Exception In case the list of paths is empty.
+     */
+    private function _virginFiles(array $files)
     {
         if (empty($files)) {
             throw new Exception('Files must be an non empty array');

@@ -1,53 +1,176 @@
 <?php
+/**
+ * Date class for sending e-mails with attachments.
+ *
+ * @author Thanasis <hello@thanpa.com>
+ */
 class Email
 {
+    /**
+     * To email.
+     *
+     * @var string
+     */
     protected $_to = '';
+    /**
+     * From email.
+     *
+     * @var string
+     */
     protected $_from = '';
+    /**
+     * Reply to email.
+     *
+     * @var string
+     */
     protected $_replyTo = '';
+    /**
+     * E-mail headers.
+     *
+     * @var array
+     */
     protected $_headers = array();
+    /**
+     * E-mail body.
+     *
+     * @var string
+     */
     protected $_body = '';
+    /**
+     * E-mail html body.
+     *
+     * @var string
+     */
     protected $_htmlBody = '';
+    /**
+     * E-mail subject.
+     *
+     * @var string
+     */
     protected $_subject = '';
+    /**
+     * E-mail attachments.
+     *
+     * @var array
+     */
     protected $_attachments = array();
+    /**
+     * E-mail hash.
+     *
+     * <p>Needed for attachments.
+     *
+     * @var string
+     */
     protected $_hash = '';
+    /**
+     * E-mail main hash.
+     *
+     * <p>Needed for attachments.
+     *
+     * @var string
+     */
     protected $_mainHash = '';
+    /**
+     * Constructor of the email instance.
+     *
+     * @return null
+     */
     public function __construct()
     {
         $this->_hash = md5(uniqid());
         $this->_mainHash = md5(uniqid());
     }
+    /**
+     * Set to address.
+     *
+     * @param string $to
+     * @return null
+     */
     public function setTo($to)
     {
         $this->_to = $to;
     }
+    /**
+     * Set from address.
+     *
+     * @param string $from
+     * @return null
+     */
     public function setFrom($from)
     {
         $this->_from = $from;
     }
+    /**
+     * Set reply to address.
+     *
+     * @param string $replyTo
+     * @return null
+     */
     public function setReplyTo($replyTo)
     {
         $this->_replyTo = $replyTo;
     }
+    /**
+     * Set subject.
+     *
+     * @param string $subject
+     * @return null
+     */
     public function setSubject($subject)
     {
         $this->_subject = $subject;
     }
+    /**
+     * Set body.
+     *
+     * @param string $body
+     * @return null
+     */
     public function setBody($body)
     {
         $this->_body = $body;
     }
+    /**
+     * Set html body.
+     *
+     * @param string $htmlBody
+     * @return null
+     */
     public function setHtmlBody($htmlBody)
     {
         $this->_htmlBody = $htmlBody;
     }
+    /**
+     * Set header.
+     *
+     * @param string $key
+     * @param string $value
+     * @return null
+     */
     public function setHeader($key, $value)
     {
         $this->_headers[] = "{$key}: {$value}";
     }
+    /**
+     * Set attachment.
+     *
+     * @param string $name
+     * @param string $content
+     * @return null
+     */
     public function setAttachment($name, $content)
     {
         $this->_attachments[$name] = $content;
     }
+    /**
+     * Send the e-mail.
+     *
+     * @param string $to
+     * @param string $subject
+     * @param string $body
+     * @return bool TRUE if the mail was successfully accepted for delivery, FALSE otherwise.
+     * @throws Exception In case to, subject or body is missing.
+     */
     public function send($to = null, $subject = null, $body = null)
     {
         if (!empty($to)) {
@@ -80,10 +203,22 @@ class Email
         $body = $this->_prepareBody();
         return mail($this->_to, $this->_subject, $body, $this->_prepareHeaders());
     }
+    /**
+     * Prepares the headers to attach to the e-mail.
+     *
+     * @return string
+     */
     protected function _prepareHeaders()
     {
         return implode("\r\n", $this->_headers);
     }
+    /**
+     * Prepares the body to attach to the e-mail.
+     *
+     * <p>Also includes the attachments.
+     *
+     * @return string
+     */
     protected function _prepareBody()
     {
         $attachments = array();

@@ -1,12 +1,48 @@
 <?php
+/**
+ * Abstraction of the tables.
+ *
+ * @author Thanasis <hello@thanpa.com>
+ */
 class Table_Abstract
 {
+    /**
+     * The database name.
+     *
+     * @var string
+     */
     private $_dbName = 'worklog_db';
+    /**
+     * The name of the current table.
+     *
+     * @var string
+     */
     protected $_name;
+    /**
+     * Singleton instances.
+     *
+     * @var array
+     */
     private static $_instances = array();
+    /**
+     * The instance of mysqli.
+     *
+     * @var mysqli
+     */
     private $_mysqli;
+    /**
+     * Constant for table true value.
+     */
     const TABLE_TRUE = '1';
+    /**
+     * Constant for table false value.
+     */
     const TABLE_FALSE = '0';
+    /**
+     * Returns the instance of the current table.
+     *
+     * @return mixed
+     */
     public static function getInstance()
     {
         $class = get_called_class();
@@ -15,6 +51,12 @@ class Table_Abstract
         }
         return self::$_instances[$class];
     }
+    /**
+     * Constructs the current table.
+     *
+     * @return null
+     * @throws Exception In case of a DB connection error.
+     */
     public function __construct()
     {
         $this->_mysqli = new mysqli('localhost', 'worklog_user', 'W0rkl0g@@', $this->_dbName);
@@ -22,10 +64,21 @@ class Table_Abstract
             throw new Exception('No db connection');
         }
     }
+    /**
+     * Destructs the current table.
+     *
+     * @return null
+     */
     public function __destruct()
     {
         $this->_mysqli->close();
     }
+    /**
+     * Queries the DB with an SQL command.
+     *
+     * @param string $sql
+     * @return mixed Depending the query: array for multi row select, stdClass for single row select, int for update.
+     */
     public function query($sql)
     {
         $sql = trim($sql);
@@ -50,7 +103,17 @@ class Table_Abstract
         }
         return $result;
     }
-    public function select($where = array(), $fields = '*', $order = '', $limit = 0)
+    /**
+     * Creates a select for the DB.
+     *
+     * @param array $where
+     * @param string $fields
+     * @param string $order
+     * @param integer $limit
+     * @return The result from the database.
+     * @throws Exception In case there is no table name set.
+     */
+    public function select(array $where = array(), $fields = '*', $order = '', $limit = 0)
     {
         if (empty($this->_name)) {
             throw new Exception('No table name set');
@@ -65,7 +128,14 @@ class Table_Abstract
         );
         return $this->query($sql);
     }
-    public function insert($data)
+    /**
+     * Inserts data in the datavase.
+     *
+     * @param array $data The data to insert.
+     * @return The result from the database.
+     * @throws Exception In case there is no table name set.
+     */
+    public function insert(array $data)
     {
         if (empty($data)) {
             throw new Exception('What are you trying to insert?');
@@ -81,7 +151,16 @@ class Table_Abstract
         );
         return $this->query($sql);
     }
-    public function update($data, $where)
+    /**
+     * Updates data in the datavase.
+     *
+     * @param array $data The data to update.
+     * @param array $where Where to update.
+     * @return The result from the database.
+     * @throws Exception In case there is no data.
+     * @throws Exception In case there is no table name set.
+     */
+    public function update(array $data, array $where)
     {
         if (empty($data)) {
             throw new Exception('What are you trying to insert?');
@@ -97,6 +176,13 @@ class Table_Abstract
         );
         return $this->query($sql);
     }
+    /**
+     * Deletes data from the datavase.
+     *
+     * @param array $where Where to delete.
+     * @return The result from the database.
+     * @throws Exception In case there is no table name set.
+     */
     public function delete($where)
     {
         if (empty($this->_name)) {
@@ -109,6 +195,12 @@ class Table_Abstract
         );
         return $this->query($sql);
     }
+    /**
+     * Describes the current database table.
+     *
+     * @return The result from the database.
+     * @throws Exception In case there is no table name set.
+     */
     public function describe()
     {
         if (empty($this->_name)) {
@@ -117,6 +209,11 @@ class Table_Abstract
         $sql = sprintf('DESCRIBE %s', $this->_name);
         return $this->query($sql);
     }
+    /**
+     * Returns the fields of the current database table.
+     *
+     * @return array The fields.
+     */
     public function getFields()
     {
         $description = $this->describe();
@@ -126,11 +223,23 @@ class Table_Abstract
         }
         return $fields;
     }
+    /**
+     * Escapes the data before puting them in the query.
+     *
+     * @param mixed $unescaped
+     * @return string The escaped data.
+     */
     public function escape($unescaped)
     {
         return $this->_mysqli->real_escape_string($unescaped);
     }
-    private function _getWhereFields($data)
+    /**
+     * Returns the SQL like where statement.
+     *
+     * @param array $data The where data.
+     * @return string
+     */
+    private function _getWhereFields(array $data)
     {
         array_walk(
             $data,
@@ -163,6 +272,12 @@ class Table_Abstract
         );
         return $data;
     }
+    /**
+     * Returns the SQL like update statement.
+     *
+     * @param array $data The update data.
+     * @return string
+     */
     private function _getUpdateFields($data)
     {
         array_walk(
@@ -188,6 +303,12 @@ class Table_Abstract
         );
         return $data;
     }
+    /**
+     * Returns the SQL like data field names.
+     *
+     * @param array $data The data.
+     * @return string
+     */
     private function _getFields($data)
     {
         $fields = array_keys($data);
@@ -200,6 +321,12 @@ class Table_Abstract
         );
         return $fields;
     }
+    /**
+     * Returns the SQL like data values.
+     *
+     * @param array $data The data.
+     * @return string
+     */
     private function _getValues($data)
     {
         $values = array_values($data);
@@ -207,6 +334,7 @@ class Table_Abstract
             $values,
             function (&$item, $field, $obj)
             {
+                unset($field);
                 switch (gettype($item)) {
                     case 'integer':
                     case 'float':

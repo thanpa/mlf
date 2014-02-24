@@ -1,4 +1,9 @@
 <?php
+/**
+ * Abstraction of the models.
+ *
+ * @author Thanasis <hello@thanpa.com>
+ */
 class Model_Abstract
 {
     /**
@@ -33,6 +38,7 @@ class Model_Abstract
      *
      * @param string $name
      * @param mixed $value
+     * @return null
      */
     public function __set($name, $value)
     {
@@ -52,13 +58,20 @@ class Model_Abstract
      * Unsets the value of the overloaded property.
      *
      * @param string $name
-     * @return void
+     * @return null
      */
     public function __unset($name)
     {
         unset($this->_data[$name]);
     }
-    protected static function gen($data, $instance)
+    /**
+     * Generates an entity with data from the database.
+     *
+     * @param stdClass $data The data from the DB.
+     * @param mixed $instance The instance to setup the data into.
+     * @return mixed The instance.
+     */
+    protected static function gen(stdClass $data, $instance)
     {
         foreach ($data as $field => $value){
             if (substr($field, -4) == 'Date' || $field == 'date') {
@@ -71,7 +84,14 @@ class Model_Abstract
         }
         return $instance;
     }
-    protected static function genCollection($stdData, $className)
+    /**
+     * Generates a collection of entities using data from the database.
+     *
+     * @param stdClass $stdData  The data from the DB.
+     * @param type $className The class name of the instance to setup the data into.
+     * @return mixed The instance.
+     */
+    protected static function genCollection(stdClass $stdData, $className)
     {
         $count = count($stdData);
         $collection = array();

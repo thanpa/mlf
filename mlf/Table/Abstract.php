@@ -11,7 +11,7 @@ class Table_Abstract
      *
      * @var string
      */
-    private $_dbName = 'worklog_db';
+    private $_dbName = 'databasename';
     /**
      * The name of the current table.
      *
@@ -59,7 +59,7 @@ class Table_Abstract
      */
     public function __construct()
     {
-        $this->_mysqli = new mysqli('localhost', 'worklog_user', 'W0rkl0g@@', $this->_dbName);
+        $this->_mysqli = new mysqli('localhost', 'user', 'password', $this->_dbName);
         if ($this->_mysqli->connect_error) {
             throw new Exception('No db connection');
         }

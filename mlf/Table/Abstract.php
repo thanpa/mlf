@@ -7,12 +7,6 @@
 class Table_Abstract
 {
     /**
-     * The database name.
-     *
-     * @var string
-     */
-    private $_dbName = 'databasename';
-    /**
      * The name of the current table.
      *
      * @var string
@@ -59,7 +53,13 @@ class Table_Abstract
      */
     public function __construct()
     {
-        $this->_mysqli = new mysqli('localhost', 'user', 'password', $this->_dbName);
+        $config = Config::getInstance('database', 'development');
+        $this->_mysqli = new mysqli(
+            $config->get('host'),
+            $config->get('user'),
+            $config->get('password'),
+            $config->get('name')
+        );
         if ($this->_mysqli->connect_error) {
             throw new Exception('No db connection');
         }

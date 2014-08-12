@@ -49,6 +49,12 @@ class Request
      */
     public $files;
     /**
+     * Cookies data.
+     *
+     * @var array
+     */
+    public $cookies;
+    /**
      * Pass data.
      *
      * @var array
@@ -78,26 +84,33 @@ class Request
      * @param array $post
      * @param array $get
      * @param array $files
+     * @param array $cookies
      * @param array $argv
      * @return null
      */
-    public function load(array $post, array $get, array $files, array $argv)
+    public function load(array $post, array $get, array $files, array $cookies, array $argv)
     {
-        if (!empty($get['url'])) {
-            $this->url = $get['url'];
-            unset($get['url']);
-        } else if (!empty($argv[1])) {
-            $this->url = $argv[1];
-            if (!empty($argv[2])) {
-                chdir($argv[2]);
-            }
-        } else {
-            $this->url = 'default/index';
-        }
         $this->post = $post;
         $this->get = $get;
         $this->files = $files;
-        $parts = explode('/', trim($this->url, ' /'));
+        $this->cookies = $cookies;
+        if (Auth::getInstance()->isSingedIn()) {
+            if (!empty($get['url'])) {
+                $this->url = $get['url'];
+                unset($get['url']);
+            } else if (!empty($argv[1])) {
+                $this->url = $argv[1];
+            } else {
+                $this->url = Acl::DEFAULT_URL;
+            }
+            $this->url = trim($this->url, ' /');
+            if (!Acl::getInstance()->isAllowed($this->url)) {
+                $this->url = Acl::DEFAULT_URL;
+            }
+        } else {
+            $this->url = Auth::SINGIN_URL;
+        }
+        $parts = explode('/', $this->url);
         $this->controllerAllias = ucfirst($parts[0]);
         $this->controller = sprintf('Controller_%s', $this->controllerAllias);
         unset($parts[0]);
@@ -136,7 +149,7 @@ class Request
      */
     public function isConsole()
     {
-        return php_sapi_name() == 'cli';
+        return php_sapi_name() === 'cli';
     }
     /**
      * Returns if the current Request has uploaded files.

@@ -1,7 +1,9 @@
 <?php
-session_start();
 date_default_timezone_set('Europe/Athens');
 setlocale(LC_ALL, 'el_GR');
+if (!empty($argv[2])) {
+    chdir($argv[2]);
+}
 if (!defined('APP_PATH')) {
     define('APP_PATH', sprintf('%s/application', dirname(getcwd())));
 }
@@ -62,7 +64,7 @@ try {
     if (!isset($argv)) {
         $argv = array();
     }
-    $request->load($_POST, $_GET, $_FILES, $argv);
+    $request->load($_POST, $_GET, $_FILES, $_COOKIE, $argv);
     $controllerName = $request->controller;
     $actionName = $request->action;
     $controller = new $controllerName();

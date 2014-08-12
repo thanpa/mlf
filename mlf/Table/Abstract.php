@@ -63,6 +63,7 @@ class Table_Abstract
         if ($this->_mysqli->connect_error) {
             throw new Exception('No db connection');
         }
+        $this->_mysqli->query('SET NAMES UTF8');
     }
     /**
      * Destructs the current table.
@@ -106,23 +107,27 @@ class Table_Abstract
     /**
      * Creates a select for the DB.
      *
-     * @param array $where
+     * @param array|null $where
      * @param string $fields
      * @param string $order
      * @param integer $limit
      * @return The result from the database.
      * @throws Exception In case there is no table name set.
      */
-    public function select(array $where = array(), $fields = '*', $order = '', $limit = 0)
+    public function select($where = null, $fields = '*', $order = '', $limit = 0, $group = '')
     {
         if (empty($this->_name)) {
             throw new Exception('No table name set');
         }
+        if ($where === null) {
+            $where = '1 = 1';
+        }
         $sql = sprintf(
-            'SELECT %s FROM %s %s %s %s',
+            'SELECT %s FROM %s %s %s %s %s',
             $fields,
             $this->_name,
-            count($where) ? sprintf('WHERE %s ', implode('AND ', $this->_getWhereFields($where))) : '',
+            sprintf('WHERE %s ', is_array($where) ? implode(' AND ', $this->_getWhereFields($where)) : $where),
+            (empty($group)) ? '' : sprintf('GROUP BY %s ', $group),
             (empty($order)) ? '' : sprintf('ORDER BY %s ', $order),
             ($limit === 0) ? '' : sprintf('LIMIT %d ', $limit)
         );

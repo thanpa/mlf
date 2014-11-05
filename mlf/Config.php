@@ -68,18 +68,20 @@ class Config
     private function _parseIniFileExtended($filename) {
         $ini = parse_ini_file($filename, true);
         $config = array();
-        foreach($ini as $namespace => $properties){
-            list($name, $extends) = explode(':', $namespace);
-            if (!isset($config[$name])) {
-                $config[$name] = array();
-            }
-            if (isset($ini[$extends])){
-                foreach($ini[$extends] as $prop => $val) {
+        foreach ($ini as $namespace => $properties) {
+            if (strpos($namespace, ':') !== false) {
+                list($name, $extends) = explode(':', $namespace);
+                if (!isset($config[$name])) {
+                    $config[$name] = array();
+                }
+                if (isset($ini[$extends])){
+                    foreach($ini[$extends] as $prop => $val) {
+                        $config[$name][$prop] = $val;
+                    }
+                }
+                foreach($properties as $prop => $val) {
                     $config[$name][$prop] = $val;
                 }
-            }
-            foreach($properties as $prop => $val) {
-                $config[$name][$prop] = $val;
             }
         }
         return $config;

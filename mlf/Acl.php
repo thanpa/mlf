@@ -28,7 +28,7 @@ class Acl
      * @var array
      */
     private $_acl = array(
-        'user1@test.com' => '*',
+        'hello@thanpa.com' => '*',
         'user2@test.com' => array(
             'default/index',
             'account/logout',
@@ -71,7 +71,10 @@ class Acl
         if (php_sapi_name() === 'cli') {
             $result = true;
         }
-        if (in_array($url, $this->_acl[$email])) {
+        if ($this->_acl[$email] === '*') {
+            $result = true;
+        }
+        if (is_array($this->_acl[$email]) && in_array($url, $this->_acl[$email])) {
             $result = true;
         }
         if (in_array($email, $this->_admins)) {

@@ -86,12 +86,18 @@ class Table_Abstract
         $command = strtoupper(substr($sql, 0, strpos($sql, ' ')));
         if ($command == 'SELECT' || $command == 'DESCRIBE') {
             $resource = $this->_mysqli->query($sql);
+            if ($resource === false) {
+                throw new Exception("There is an error with the query:\n{$sql}");
+            }
             $result = array();
             while ($object = $resource->fetch_object()) {
                 $result[] = $object;
             }
-            if (count($result) == 1) {
+            if (count($result) === 1) {
                 $result = current($result);
+            }
+            if (count($result) === 0) {
+                $result = null;
             }
         } else if ($command == 'INSERT') {
             if ($this->_mysqli->query($sql)) {
